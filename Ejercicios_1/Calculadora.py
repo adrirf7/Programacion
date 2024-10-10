@@ -11,9 +11,7 @@ elif operacion== "*":
     calculo= numero_uno * numero_dos
     print (calculo)
 else :
-    if numero_uno == 0:
-        print ("error")
-    elif numero_dos ==0 :
+    if numero_dos ==0 :
         print("error")
     else :
         calculo = numero_uno / numero_dos
