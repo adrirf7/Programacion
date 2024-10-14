@@ -8,3 +8,4 @@ while True:
         agenda [nombre] =telefono
 
 print(agenda)
+print ("hola")
