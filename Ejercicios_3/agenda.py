@@ -7,5 +7,11 @@ while True:
         telefono = input ("ingrese numero de telefono ")
         agenda [nombre] =telefono
 
-print(agenda)
-print ("hola")
+print("-------Tu lista de contactos-------")
+for nombre, telefono in agenda.items():
+    print(f"- {nombre}: {telefono}")
+
+busqueda_numero= input("Ingresa el nombre del contacto que deseas buscar: ")
+
+if busqueda_numero in agenda:
+    print (f"{busqueda_numero}: {agenda[busqueda_numero]}")
