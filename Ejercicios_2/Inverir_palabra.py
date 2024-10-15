@@ -1,6 +1,6 @@
 palabra= input("Escribe una palabra ")
-contador=0
+palabra_invertida=""
+
 for letra in palabra:
-    contador = contador+1
-for letra in range(contador, 1):
-    print (letra)
+    palabra_invertida = letra + palabra_invertida
+print (f"Palabra invertida: {palabra_invertida}")
