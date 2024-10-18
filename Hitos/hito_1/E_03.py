@@ -7,7 +7,12 @@ def ingresarDinero():
 
 def retirarDinero():
     saldo_actualizado= saldo_actual-retiro
-    return saldo_actualizado 
+    if saldo_actualizado>0:
+        return saldo_actualizado 
+    else:
+        return "--ERROR-- No puedes quedarte en negativo"
+
+
 
 while True:
     saldo_user= float(input("\nIngrese la cantidad de saldo "))
@@ -18,7 +23,7 @@ while True:
         break
 
 operaciones ={1: "Ingresar Dinero", 2: "Retirar Dinero", 3: "Mostrar Saldo", 4: "Estadisticas", 5: "Salir"}
-
+contador_operaciones=0
 
 while True:
     print("------Operaciones Disponibles------")
@@ -32,9 +37,13 @@ while True:
         print("Saliendo del programa...")
         break
     else:
+        contador_operaciones =+ 1
         if user_operacion == 1:
             ingreso= float(input("Añada la cantidad de dinero que desea Ingresar "))
-            print(f"Tu saldo actual es: {saldoActual()}\n")
+            print(f"Tu saldo actual es: {ingresarDinero()}\n")
         elif user_operacion == 2:
             retiro= float(input("Añada la cantidad de dinero que desea retirar "))
-            print(f"Tu saldo actual es: {saldoActual()}\n")
+            print(f"Tu saldo actual es: {retirarDinero()}\n")
+        else:
+            print(f"-Has realizado {contador_operaciones} operaciones")
+
