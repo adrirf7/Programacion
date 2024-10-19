@@ -36,7 +36,9 @@ if victorias_usuario > victorias_computer: #Muestra el mensaje final de victoria
     print("------------------------------------------")
     print(f"-----|| Usuario : {victorias_usuario} || Computer: {victorias_computer} ||-----")
     print("Has ganado!!!!")
+    print("------------------------------------------")
 else:
     print("------------------------------------------")
     print(f"-----|| Usuario : {victorias_usuario} || Computer: {victorias_computer} ||-----")
     print("Has perdido...")
+    print("------------------------------------------")
