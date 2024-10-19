@@ -16,10 +16,10 @@ victorias_computer=0
 while victorias_usuario <3 and victorias_computer <3 : #Bucle hasta que uno de los dos llegue a 3 victorias
     print(f"\n-----|| Usuario : {victorias_usuario} || Computer: {victorias_computer} ||-----") #Contador de victorias
     
-    user_input = int(input("Elije: 1- Piedra | 2- Papel | 3- Tijera: ")) #Eleccion del usuario
     computer= random.randint(1, 3) #Eleccion de la maquina
-    
+
     try: #Para cuando el ususario introduce un valor valido
+        user_input = int(input("Elije: 1- Piedra | 2- Papel | 3- Tijera: ")) #Eleccion del usuario
         print(f"-Has elegido: {elementos[user_input]}") #Print de eleccion del usuario
         print(f"-La maquina ha elegido: {elementos[computer]}") #Print de la eleccion de la maquina 
         if resultadoJuego() == "Ganaste":
@@ -28,7 +28,7 @@ while victorias_usuario <3 and victorias_computer <3 : #Bucle hasta que uno de l
             victorias_computer += 1
 
         print (f"{resultadoJuego()}\n") 
-    except: #para cuando el ususario introduce un valor superior a 3 
+    except: #para cuando el ususario introduce un valor invalido 
         print("Numero invalido")
     
 
