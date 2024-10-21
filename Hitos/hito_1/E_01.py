@@ -1,16 +1,16 @@
-def areaCuadrado(area): #Calculo del area del cuadrado
+def areaCuadrado(): #Calculo del area del cuadrado
     num=lado_cuadrado ** 2
     return num
 
-def perimetroCuadrado(perimetro): #Calculo del perimetro
+def perimetroCuadrado(): #Calculo del perimetro
     num=lado_cuadrado * 4
     return num
 
-def areaRectangulo(area): #Calculo del area del rectangulo
+def areaRectangulo(): #Calculo del area del rectangulo
     num= base_rectangulo * altura_rectangulo
     return num
 
-def perimetroRectangulo(perimetro): #Calculo perimetro del rectangulo
+def perimetroRectangulo(): #Calculo perimetro del rectangulo
     num= 2* (base_rectangulo + altura_rectangulo)
     return num
 
@@ -39,7 +39,7 @@ while True: #Bucle infinito para mostrar consantemente el menu y pedir una opcio
             altura_rectangulo =int(input("Dame la altura del Rectangulo: "))
             
             for numeros in range(altura_rectangulo): #Debera repetir el proceso tantas veces como corresponda con el valor de Altura
-                print("* " * base_rectangulo) #imprimira tantos "*" como correspondan al valor de la base
+                print("*  " * base_rectangulo) #imprimira tantos "*" como correspondan al valor de la base
             print(f"Su area es: {areaRectangulo(base_rectangulo)}") 
             print(f"Su perimetro es: {perimetroRectangulo(base_rectangulo)}\n")
 
