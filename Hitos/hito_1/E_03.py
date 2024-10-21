@@ -1,14 +1,14 @@
-def ingresarDinero(saldo_user, ingreso):
+def ingresarDinero(saldo_user): #Funcio para ingresar dinero
     if ingreso <= 0:
         return "--ERROR--Ingrese una cantidad superior a 0 "
     else:
         saldo_actualizado = saldo_user + ingreso
-        return saldo_actualizado, saldo_actualizado
+        return saldo_actualizado
 
-def retirarDinero(saldo_user, retiro):
+def retirarDinero(saldo_user): #funcion para sacar dinero
     saldo_actualizado= saldo_user-retiro
     if saldo_actualizado>0:
-        return saldo_actualizado, saldo_actualizado
+        return saldo_actualizado
     else:
         return "--ERROR-- No puedes quedarte en negativo"
 
@@ -44,13 +44,13 @@ while True: #Bucle infinito hasta que seleccione la opcion de salir
 
         elif user_operacion == 1:
             ingreso= float(input("Añada la cantidad de dinero que desea Ingresar "))
-            _, saldo_user = ingresarDinero(saldo_user, ingreso) #Se actualiza el valor de saldo_user para futuras operaciones
+            saldo_user = ingresarDinero(saldo_user) #Se actualiza el valor de saldo_user para futuras operaciones
             ingreso_stats += ingreso
             contador_ingresos += 1 #Se suma uno al contador que se mostrara en la opcion de estadisticas
 
         elif user_operacion == 2:
             retiro= float(input("Añada la cantidad de dinero que desea retirar "))
-            saldo_user, _=retirarDinero(saldo_user, retiro) #Se actualiza el valor de saldo_user para futuras operaciones 
+            saldo_user =retirarDinero(saldo_user) #Se actualiza el valor de saldo_user para futuras operaciones 
             contador_retiradas += 1
             retiro_stats += retiro
 
