@@ -19,7 +19,7 @@ lista={1 :"Cuadrado", 2: "Rectangulo", 3: "Salir"} #Lista con los elementos que 
 while True: #Bucle infinito para mostrar consantemente el menu y pedir una opcion al usuario hasa que inserte 3
     print("\n-----Menu-----")
     for numero, forma in lista.items(): #Se muestra la lista ordenada y numerada 
-        print (f"{numero}.- {forma}") #Sumamos 1 a i para que empiece la lista en 1
+        print (f"{numero}.- {forma}") 
 
     try: #solo aceptara valores valores numericos < 3
         user_input= int(input("Dime una opcion: ")) #Pide al usuario elegir entre las 3 opciones de la lista
