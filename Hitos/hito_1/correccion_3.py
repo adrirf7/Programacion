@@ -26,8 +26,11 @@ def mostrarMenu():
     print("------Operaciones Disponibles------")
     for numero, operacion in operaciones.items(): #Muestra las operaciones ordenadas y numeradas
         print(f"{numero}.- {operacion}")
-    user_operacion=int(input("\nIngrese el numero de la operacion que deseas realizar ")) #Accion que desea hacer el usuario
-    return user_operacion
+    try:
+        user_operacion=int(input("\nIngrese el numero de la operacion que deseas realizar ")) #Accion que desea hacer el usuario
+        return user_operacion
+    except:
+         print("--ERROR--Ingrese un valor numerico")
 
 def mostrarEstadisticas():
     print(f"\n-Has realizado {contador_ingresos} ingresos, con un valor total de {ingreso_stats} €")
