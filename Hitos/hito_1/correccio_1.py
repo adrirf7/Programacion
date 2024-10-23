@@ -30,17 +30,16 @@ def mostrarMenu():
 lista={1 :"Cuadrado", 2: "Rectangulo", 3: "Salir"} #Diccionario con los elementos que se mostraran en el menu
 
 while True: 
-    user_input=mostrarMenu()
-
-    try: #solo aceptara valores valores numericos < 3
-        if user_input not in lista:
+    try: #solo aceptara valores valores numericos 
+        user_input=mostrarMenu()  #Llamar a la funcion del menu estableciendo el valor que retorna como user_input
+        if user_input not in lista: #Solo se aceptaran valores <=3
             print("--ERROR-- Ingrese una opcion valida")
 
         elif user_input == 1:
-            calculoCuadrado()
+            calculoCuadrado() #Llamar a la funcion del cuadrado
 
         elif user_input== 2: 
-            calculoRectangulo()
+            calculoRectangulo() #Llamar a la funcion del rectangulo
         
         elif user_input== 3: 
             print("Saliendo del programa...")

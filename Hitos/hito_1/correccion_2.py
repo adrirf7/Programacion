@@ -6,18 +6,18 @@ def resultadoJuego(): #Establecemos las reglas del juego
     print(f"-Has elegido: {elementos[user_input]}") #Print de eleccion del usuario
     print(f"-La maquina ha elegido: {elementos[computer]}") #Print de la eleccion de la maquina 
  
-    if user_input == computer:
+    if user_input == computer: #Empate
         return "Empate"
-    elif (user_input == 1 and computer== 3 ) or (user_input == 2 and computer == 1) or (user_input == 3 and computer == 2):
+    elif (user_input == 1 and computer== 3 ) or (user_input == 2 and computer == 1) or (user_input == 3 and computer == 2): #Establecemos las condiciones de victoria 
         return "Ganaste"
-    else:
+    else: #Sino solo queda la opcion de derrota
         return "Perdiste"
 
 def resultadoGanador():
     print("------------------------------------------")
-    print(f"-----|| Usuario : {victorias_usuario} || Computer: {victorias_computer} ||-----")
+    print(f"-----|| Usuario : {victorias_usuario} || Computer: {victorias_computer} ||-----") #Contador victorias
     if victorias_usuario>victorias_computer: 
-        print("Has Ganado!!!")
+        print("Has Ganado!!!") 
     else:
         print("Has Perdido...")
     print("------------------------------------------")
@@ -40,7 +40,7 @@ while victorias_usuario <3 and victorias_computer <3 : #Bucle hasta que uno de l
 
         print (f"{resultado}\n") 
 
-    except: #para cuando el ususario introduce un valor invalido 
+    except: #para cuando el usuario introduce un valor invalido 
         print("Numero invalido")
     
 resultadoGanador()

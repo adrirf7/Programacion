@@ -1,11 +1,11 @@
 def ingresarDinero(saldo_user): #Funcio para ingresar dinero
         ingreso= float(input("Añada la cantidad de dinero que desea Ingresar "))
-        if ingreso > 0:
+        if ingreso > 0: #Solo podra ingresar valores superiores a 0
            return saldo_user + ingreso, ingreso
     
 def retirarDinero(saldo_user): #funcion para sacar dinero
         retiro= float(input("Añada la cantidad de dinero que desea retirar "))
-        if retiro<=saldo_user:
+        if retiro<=saldo_user: #El usuario no se puede quedar en negativo
             return saldo_user - retiro, retiro
 
 def saldoInicial():
@@ -13,7 +13,7 @@ def saldoInicial():
         try:
             saldo_user= float(input("\nIngrese la cantidad de saldo "))  
 
-            if saldo_user>0: #Solo seran admitidos valores superiores a 0
+            if saldo_user>=0: #Solo seran admitidos valores superiores a 0
                 return saldo_user
                 
             else:
@@ -30,11 +30,12 @@ def mostrarMenu():
     return user_operacion
 
 def mostrarEstadisticas():
-    print(f"\n-Has realizado {contador_ingresos} ingresos, con un total de {ingreso_stats} €")
+    print(f"\n-Has realizado {contador_ingresos} ingresos, con un valor total de {ingreso_stats} €")
     print(f"-Has realizado {contador_retiradas} retiradas, con un valor total de {retiro_stats} €\n")
     
 operaciones ={1: "Ingresar Dinero", 2: "Retirar Dinero", 3: "Mostrar Saldo", 4: "Estadisticas", 5: "Salir"} #Establecemos las operaciones disponibles 
 contador_ingresos, contador_retiradas, ingreso_stats, retiro_stats=0, 0, 0, 0 #contadores para las estadisticas 
+
 saldo_user = saldoInicial()
 
 while True: #Bucle infinito hasta que seleccione la opcion de salir
