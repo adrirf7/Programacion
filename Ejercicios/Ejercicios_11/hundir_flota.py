@@ -1,40 +1,67 @@
 import numpy as np
 
-#pritn tablero
-tablero= np.zeros((5, 5))
+def ubicacionBarco():
+    tablero= np.zeros((5, 5)) #generamos el tablero real donde se ubicara el barco
 
-#valores aleatorios para ubicar los barcos
-barco_fila=np.random.randint(0,6)
-barco_columna=np.random.randint(0,6)
+    #valores aleatorios para ubicar los barcos
+    barco_fila=np.random.randint(0,5)
+    barco_columna=np.random.randint(0,5)
 
-#integrar barcos
-tablero[barco_fila, :]=1
-tablero[:, barco_columna]=1
+    #integrar barco en el tablero
+    tablero[barco_fila, barco_columna ]=1
 
-tablero_visible= np.zeros((5, 5))
-print(tablero_visible)
+    #Tablero de mentira donde no se muestre la ubicacion del barco
+    tablero_visible= np.zeros((5, 5))
+    
+    return tablero, tablero_visible
+
+def bienvenida(): #Mensaje bienvenida
+    print("\n¡Bienvenido a la batalla naval!")
+    print("Intenta destruir el barco\n")
+    
+def UserInput(): 
+    print(f"----Intentos: {intentos}----") #contador intentos
+    print(f"{tablero_visible}\n") #Muestra el tablero de mentira para no revelar la ubicacion del barco
+    
+    ataque_fila= int(input("Ingrese valor fila ")) -1 #Input de la fila
+    ataque_columna= int(input("Ingrese valor columna ")) -1 #Input de la columna
+    return ataque_fila, ataque_columna
 
 #contadores
-barcos= np.sum(tablero==1)
-aciertos=0
-intentos=0
+def contadores():
+    aciertos=0
+    intentos=0
+    return aciertos, intentos
 
-#Ataque
-while aciertos< barcos:
-    print(f"Intentos: {intentos}")
-    ataque_fila= int(input("Ingrese valor fila ")) -1
-    ataque_columna= int(input("Ingrese valor columna ")) -1
+def mensajeFinal():
+    print("----El barco ha sido hundido----")
+    print(f"Intentos Totales: {intentos}")
+    print (tablero_visible)
+    print ("------Has ganado------")
 
-    #comprobacion 
-    if tablero[ataque_fila, ataque_columna]==1:
-        tablero_visible[ataque_fila, ataque_columna]=2
-        aciertos +=1
-        intentos +=1
-        print("tocado")
-    else:
-        print("agua")
-        tablero_visible[ataque_fila, ataque_columna]=-1
-    print(tablero_visible)
+#llamada de funciones
+tablero, tablero_visible= ubicacionBarco() 
+aciertos, intentos=contadores()
+bienvenida()
 
-print("Barcos Hundidos")
+while aciertos< 1: #mientras que el contador sea 0
+    try:
+        ataque_fila, ataque_columna = UserInput() #llamada a la funcion del input
+
+        #comprobacion 
+        if tablero[ataque_fila, ataque_columna]==1: #comprueba si en la ubicacion del usuario hay un 1 (barco)
+
+            tablero_visible[ataque_fila, ataque_columna]=2 #Si acierta remplaza la casilla por un 2
+            aciertos +=1
+            intentos +=1
+            print(f"\nEn la casilla {ataque_fila, ataque_columna} Se encuentra el barco. Tocado\n")
+        else:
+
+            print(f"\nEn la casila {ataque_fila, ataque_columna} No hay nada. Agua\n")
+            tablero_visible[ataque_fila, ataque_columna]=-1 #Muestra un -1 en la casilla donde no hay barco
+            intentos +=1
+    except:
+        print("--ERROR-- Ingrese un numero valido")
+
+mensajeFinal()
 
