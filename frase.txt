@@ -1,1 +1,0 @@
-Ejercicio 2: Leer el Contenido de un Archivo de Texto
