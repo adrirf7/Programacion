@@ -10,19 +10,21 @@ def ubicacionBarco():
             orientacion = np.random.randint(0,2)
 
             if orientacion ==1:
-                fila = np.random.randint(0,21)
-                columna = np.random.randint (0,21 - longitud +1)
+                fila = np.random.randint(0,21) 
+                columna = np.random.randint (0,21 - longitud) 
                 
                 if np.all(tablero[fila, columna: columna + longitud] == 0):
-                    tablero [fila, columna: columna + longitud] = 1
+                    tablero [fila-1, columna-1: columna-1 + longitud] = 1
+                    print(fila, columna, longitud, orientacion)
                     break
             
             else:
-                fila = np.random.randint(0,21)
-                columna = np.random.randint (0,21 - longitud +1)
+                fila = np.random.randint(0,21) 
+                columna = np.random.randint (0,21 - longitud) 
 
                 if np.all(tablero[fila, columna: columna + longitud] == 0):
-                    tablero [fila: fila + longitud, columna] = 1
+                    tablero [fila-1: fila + longitud-1, columna-1] = 1
+                    print(fila, columna, longitud, orientacion)
                     break
 
     #Tablero de mentira donde no se muestre la ubicacion del barco
@@ -35,10 +37,10 @@ def bienvenida(): #Mensaje bienvenida
     print("Intenta destruir el barco\n")
     
 def UserInput(): 
-    print(tablero)
+    
     print(f"----Intentos: {intentos}----") #contador intentos
     for fila in tablero_visible:
-        print("  ".join(str(int(x)) for x in fila))  # Muestra el tablero final
+        print("  ".join(str(int(i)) for i in fila))  # Muestra el tablero final
     ataque_fila= int(input("Ingrese valor fila ")) -1 #Input de la fila
     ataque_columna= int(input("Ingrese valor columna ")) -1 #Input de la columna
     return ataque_fila, ataque_columna
