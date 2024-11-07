@@ -33,5 +33,3 @@ try:
 except FileNotFoundError:
     # Capturamos el error en caso de que el archivo no exista y mostramos un mensaje de error
     print("Archivo no encontrado")
-
-
