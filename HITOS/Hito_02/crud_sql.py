@@ -2,6 +2,7 @@ import bd_connect, getpass, menu
 conexion = bd_connect.db()
 cursor = conexion.cursor()
 id_usuario=None
+id_carrito=None
 
 def registroUser():
         global id_usuario
@@ -81,7 +82,7 @@ def leerCatalogo():
 
 def obtener_o_crear_carrito():
     #Obtiene el carrito existente del usuario o crea uno nuevo si no existe.
-    global id_usuario
+    global id_usuario, id_carrito
 
     # Verifica si el carrito ya existe
     cursor.execute("SELECT idCarrito FROM carrito WHERE idCliente = %s", (id_usuario,))
@@ -127,11 +128,10 @@ def añadirCarrito():
             subtotal = unidades*precio_unitario
 
             # Obtener el carrito del usuario
-
-            cursor.execute("insert into carrito (idCliente, idProducto, cantidad, precioUnitario, subtotal) VALUES (%s, %s, %s, %s, %s)",(id_usuario, idProducto, unidades, precio_unitario, subtotal))
+            cursor.execute("insert into carrito (idCliente, idProducto, cantidad, precioUnitario, subtotal) VALUES (%s, %s, %s, %s, %s)",(id_usuario, idProducto, unidades, precio_unitario, subtotal, id_carrito))
 
             conexion.commit()
-            print(f"Producto {idProducto} añadido al carrito con {unidades} unidades.")
+            print(f"Producto {producto} añadido al carrito con {unidades} unidades.")
         
         elif user_input==2:
             leerCatalogo()
