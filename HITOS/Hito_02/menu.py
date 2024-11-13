@@ -26,10 +26,11 @@ def menuAcciones():
                 1: "Ver catalogo",
                 2: "Ver carrito",
         }
+
         print("\n---Opciones Disponibles---")
         for numero, opcion in opciones.items():
                 print(f"{numero}.- {opcion}")
         
         user_input=int(input("Que deseas Hacer: "))
         if user_input == 1:
-                sql.leerCatalogo()
+                sql.leerCatalogo() 

@@ -41,7 +41,7 @@ def actualizar():
 # Función para eliminar una categoría existente por su ID
 def eliminar():
     try:
-        id_user = int(input("Ingrese el id de la categoría que deseas eliminar "))
+        id_user = int(input("Ingrese el id de la categoría que deseas eliminar: "))
         
         # Elimina la categoría de la base de datos
         cursor.execute("DELETE FROM categoria WHERE idcategoria = %s", (id_user,))
