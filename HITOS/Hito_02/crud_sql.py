@@ -2,21 +2,20 @@ import bd_connect, getpass, menu
 conexion = bd_connect.db()
 cursor = conexion.cursor()
 id_usuario=None
-id_carrito=None
 
 def registroUser():
-        global id_usuario
+        global id_usuario, user
         try:
             print("---Registrate---")
-            email= input("Email: ").strip()
+            user= input("Email: ").strip()
             password= getpass.getpass("Contraseña: ").strip()
 
-            cursor.execute("INSERT INTO clientes (correo, contrasela) VALUES (%s, %s)", (email, password))
+            cursor.execute("INSERT INTO clientes (correo, password) VALUES (%s, %s)", (user, password))
             conexion.commit()
             print("Usuario registrado correctamente.")
 
             # Extraemos y asignamos el idCliente a la variable global id_usuario
-            cursor.execute("SELECT idCliente FROM clientes WHERE correo = %s", (email,))
+            cursor.execute("SELECT idCliente FROM clientes WHERE correo = %s", (user,))
             id_usuario = cursor.fetchone()[0]  # Asignamos el id_cliente como global
             return id_usuario  # Devolvemos el id_usuario para que quede asignado
 
@@ -29,20 +28,20 @@ def registroUser():
                 registroUser()
 
 def inicioSesion():
-    global id_usuario
+    global id_usuario, user
     try:
         while True:
             print("\n--Inicio de Sesion--")
-            email= input("Email: ").strip()
+            user= input("Email: ").strip()
             password= getpass.getpass("Contraseña: ").strip()
-            password_db=cursor.execute("SELECT contrasela from clientes where correo = %s", (email,))
+            password_db=cursor.execute("SELECT password from clientes where correo = %s", (user,))
             resultado= cursor.fetchone()
             password_db =resultado[0]
 
             if password == password_db:
                 print("Sesion Iniciada Correctamente")
                 # Extraemos y asignamos el idCliente a la variable global id_usuario
-                cursor.execute("SELECT idCliente FROM clientes WHERE correo = %s", (email,))
+                cursor.execute("SELECT idCliente FROM clientes WHERE correo = %s", (user,))
                 id_usuario = cursor.fetchone()[0]  # Asignamos el id_cliente como global
                 return id_usuario  # Devolvemos el id_usuario para que quede asignado
             
@@ -80,59 +79,73 @@ def leerCatalogo():
     else:
         menu.menuAcciones() 
 
-def obtener_o_crear_carrito():
-    #Obtiene el carrito existente del usuario o crea uno nuevo si no existe.
-    global id_usuario, id_carrito
-
-    # Verifica si el carrito ya existe
-    cursor.execute("SELECT idCarrito FROM carrito WHERE idCliente = %s", (id_usuario,))
-    carrito = cursor.fetchone()
-
-    if carrito:
-        id_carrito = carrito[0]  # Usa el idCarrito existente
-        print(f"Carrito existente encontrado con id {id_carrito}.")
-    else:
-        # Si no existe carrito, se crea uno nuevo
-        cursor.execute("INSERT INTO carrito (idCliente) VALUES (%s)", (id_usuario,))
-        conexion.commit()
-        
-        # Recuperamos el idCarrito recién creado
-        cursor.execute("SELECT LAST_INSERT_ID()")
-        id_carrito = cursor.fetchone()[0]
-        print(f"Nuevo carrito creado con id {id_carrito} para el usuario {id_usuario}.")
-    
-    return id_carrito  # Retorna el id del carrito, ya sea el existente o el nuevo
-
 def añadirCarrito():
-    opciones={
-        1: "Añadir productos al carrito",
-        2: "Volver a categorias",
-        3: "Ver el carrito"
-    }
+
     while True:
-        print("\n--Opciones--")
-        for numero, opcion in opciones.items():
-            print(f"{numero}.- {opcion}")
-        user_input=int(input("Que deseas hacer?: "))
+        try:
+            user_input=menu.menuCarrito()
+            
+            if user_input== 1:
+                producto = (input("Ingrese el nombre del producto que deseas añadir al carrito: "))
+                unidades= int(input(f"Ingresa la cantidad de unidades para {producto}: "))
 
-        if user_input== 1:
-            producto = (input("Ingrese el nombre del producto que deseas añadir al carrito: "))
-            unidades= int(input(f"Ingresa la cantidad de unidades para {producto}: "))
+                cursor.execute("SELECT idProducto, precio from productos where nombreProducto=%s", (producto,))
+                producto_info = cursor.fetchone()
 
-            cursor.execute("SELECT idProducto from productos where nombreProducto=%s", (producto,))
-            idProducto=cursor.fetchone()
+                if producto_info is None:
+                    print(f"--ERROR-- Producto '{producto}' no encontrado.")
+                    continue
+                
+                idProducto, precio_unitario = producto_info
+                subtotal = unidades * precio_unitario
+                
+                # Obtener el carrito del usuario
+                cursor.execute("insert into carrito (idCliente, idProducto, cantidad, precioUnitario, subtotal) VALUES (%s, %s, %s, %s, %s)",(id_usuario, idProducto, unidades, precio_unitario, subtotal))
 
-            cursor.execute("SELECT precio FROM Productos WHERE nombreProducto = %s", (producto,))
-            precio=cursor.fetchone()    
-            precio_unitario = precio[0]
-            subtotal = unidades*precio_unitario
+                conexion.commit()
+                print(f"Producto {producto} añadido al carrito con {unidades} unidades.")
+            
+            elif user_input==2:
+                leerCatalogo()
+                
+            elif user_input ==3:
+                verCarrito()
+                break
+                
+            else:
+                print("--ERROR--Ingresa una opcion valida")
+                
+        except Exception as e:
+            print(f"--ERROR-- Ha ocurrido un error: {e}")
 
-            # Obtener el carrito del usuario
-            cursor.execute("insert into carrito (idCliente, idProducto, cantidad, precioUnitario, subtotal) VALUES (%s, %s, %s, %s, %s)",(id_usuario, idProducto, unidades, precio_unitario, subtotal, id_carrito))
+def verCarrito():
+    print(f"\n-----Carrito de {user}-----")
+    cursor.execute(
+        "SELECT productos.nombreProducto, carrito.cantidad, carrito.precioUnitario, carrito.subtotal "
+        "FROM carrito JOIN productos ON carrito.idProducto = productos.idProducto "
+        "WHERE carrito.idCliente = %s", (id_usuario,)
+    )
+    items = cursor.fetchall()
+    
+    total = 0
+    for item in items:
+        nombre_producto, cantidad, precio_unitario, subtotal = item
+        print(f"|| Producto: {nombre_producto} || Unidades: {cantidad} || Precio: {precio_unitario} || Subtotal: {subtotal}")
+        total += subtotal
 
-            conexion.commit()
-            print(f"Producto {producto} añadido al carrito con {unidades} unidades.")
-        
-        elif user_input==2:
-            leerCatalogo()
-        
+    print(f"\nTotal del Carrito: {total:.2f}")
+    
+    user_input = menu.menuCompra()
+    
+    if user_input== 1:
+        cursor.execute(
+            """
+            INSERT INTO Pedidos (idCliente, fechaPedido, totalPedido)
+            SELECT idCliente, 
+            CURDATE(), -- Fecha actual
+            SUM(subtotal) -- Suma de los subtotales de los productos en el carrito
+            FROM Carrito
+            WHERE idCliente = %s  -- Aquí debes pasar el id del cliente que está realizando el pedido
+            GROUP BY idCliente;"""
+        )
+

@@ -1,4 +1,4 @@
 import menu
 
-menu.menuPrincipal()
+menu.inicioUsuario()
 menu.menuAcciones()
