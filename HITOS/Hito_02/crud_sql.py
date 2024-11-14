@@ -87,7 +87,7 @@ def añadirCarrito():
             user_input=menu.menuCarrito()
             
             if user_input== 1:
-                producto = (input("Ingrese el nombre del producto que deseas añadir al carrito: "))
+                producto = (input("Ingrese el nombre del producto que deseas añadir al carrito: ")).strip()
                 unidades= int(input(f"Ingresa la cantidad de unidades para {producto}: "))
 
                 cursor.execute("SELECT idProducto, precio from productos where nombreProducto=%s", (producto,))
@@ -144,7 +144,7 @@ def verCarrito():
     elif user_input==2:
         modificarCarrito()
     
-    elif user_input==3:
+    else:
         menu.menuAcciones()
   
       
@@ -301,3 +301,58 @@ def totalPedido():
         total_pedido += subtotal
     
     return total_pedido
+
+def leerPedidos():
+    cursor.execute(
+        """SELECT 
+    p.idPedido,
+    p.fechaPedido,
+    p.fechaEntrega,
+    p.direccionEntrega,
+    p.totalPedido
+    FROM 
+    Pedidos p
+    JOIN 
+        Clientes c ON p.idCliente = c.idCliente
+    WHERE 
+        c.idCliente = %s
+    """, (id_usuario)
+    )
+    
+    resultado=cursor.fetchall()
+    print(f"\n-----Pedidos de {user}-----")
+    for id, fechaPedido, fechaEntrega, direccion, total in resultado:
+        print(f"Pedido ID: {id} || Pedido Realizado el: {fechaPedido} || Fecha de entrega el: {fechaEntrega} || Direccion de entrega: {direccion} || Total: {total}")
+        
+    user_input= menu.menuDetallesPedidos()
+    
+    if user_input==1:
+        leerDetallesPedido()
+    
+    elif user_input ==2:
+        menu.menuAcciones()
+        
+def leerDetallesPedido():
+    
+    id_pedido=int(input("Ingrrese el ID del pedido que deseas ver: "))
+    cursor.execute(
+        """SELECT 
+    pr.nombreProducto,
+    dp.cantidad,
+    dp.precioUnitario,
+    dp.subtotal
+    FROM 
+        Detalles_Pedido dp
+    JOIN 
+        Productos pr ON dp.idProducto = pr.idProducto
+    WHERE 
+        dp.idPedido = %s;""", (id_pedido)
+    )
+    resultado=cursor.fetchall()
+    total=0
+    print(f"\n-----Detalles del pedido {id_pedido}-----")
+    for producto, cantidad, precio, subtotal in resultado:
+        print(f"Producto: {producto} || Unidades: {cantidad} || Precio: {precio} || Total: {subtotal}") 
+        total += subtotal
+        
+    print(f"\nTotal del pedido: {total}")

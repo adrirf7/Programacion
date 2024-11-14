@@ -25,7 +25,8 @@ def menuAcciones():
         opciones={
                 1: "Ver catalogo",
                 2: "Ver carrito",
-                3: "Ver pedidos"
+                3: "Ver pedidos",
+                4: "Cerrar Programa"
         }
         while True:
                 try:
@@ -38,6 +39,11 @@ def menuAcciones():
                                 sql.leerCatalogo() 
                         elif user_input== 2:
                                 sql.verCarrito()
+                        elif user_input ==3:
+                                sql.leerPedidos()
+                        elif user_input==4:
+                                print("Cerrando el programa...")
+                                break
                 except:
                         print("--ERROR-- Ingrese una opcion valida ")
         
@@ -82,6 +88,23 @@ def menuModificarCarrito():
                 1: "Modificar unidades de un Producto",
                 2: "Eliminar un Producto",
                 3: "Volver"
+        }
+        
+        while True:
+                try:
+                        print("\n--Opciones--")
+                        for numero, opcion in opciones.items():
+                                print(f"{numero}.- {opcion}")
+                                
+                        user_input=int(input("Que deseas hacer?: "))
+                        return user_input
+                except:
+                        print("--ERROR--Ingrese una opcion valida")
+
+def menuDetallesPedidos():
+        opciones={
+                1: "Ver detalles de un pedido",
+                2: "Volver al Menu",
         }
         
         while True:
