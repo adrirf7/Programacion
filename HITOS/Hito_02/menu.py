@@ -42,17 +42,18 @@ def menuAcciones():
                         print("--ERROR-- Ingrese una opcion valida ")
         
 def menuCompra():
+        
+        opciones={
+                1: "Comprar prodcutos del carrito",
+                2: "Modificar Carrito",
+                 3: "volver al Menu"
+                }
         while True:
                 try:
-                        opciones={
-                                1: "Comprar prodcutos del carrito",
-                                2: "Modificar Carrito",
-                                3: "volver al Menu"
-                        }
                         print("\n--Opciones--")
                         for numero, opcion in opciones.items():
                                 print(f"{numero}.- {opcion}")
-                                
+                                        
                         user_input= int(input("Ingrese una opcion: "))
                         return user_input
                 except:
@@ -63,6 +64,24 @@ def menuCarrito():
         1: "Añadir productos al carrito",
         2: "Volver a categorias",
         3: "Ver el carrito"
+        }
+        
+        while True:
+                try:
+                        print("\n--Opciones--")
+                        for numero, opcion in opciones.items():
+                                print(f"{numero}.- {opcion}")
+                                
+                        user_input=int(input("Que deseas hacer?: "))
+                        return user_input
+                except:
+                        print("--ERROR--Ingrese una opcion valida")
+
+def menuModificarCarrito():
+        opciones={
+                1: "Modificar unidades de un Producto",
+                2: "Eliminar un Producto",
+                3: "Volver"
         }
         
         while True:

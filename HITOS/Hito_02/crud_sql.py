@@ -1,4 +1,6 @@
-import bd_connect, getpass, menu
+import bd_connect, getpass, random, menu
+from datetime import datetime, timedelta
+
 conexion = bd_connect.db()
 cursor = conexion.cursor()
 id_usuario=None
@@ -80,7 +82,6 @@ def leerCatalogo():
         menu.menuAcciones() 
 
 def añadirCarrito():
-
     while True:
         try:
             user_input=menu.menuCarrito()
@@ -118,7 +119,7 @@ def añadirCarrito():
         except Exception as e:
             print(f"--ERROR-- Ha ocurrido un error: {e}")
 
-def verCarrito():
+def verCarrito(): 
     print(f"\n-----Carrito de {user}-----")
     cursor.execute(
         "SELECT productos.nombreProducto, carrito.cantidad, carrito.precioUnitario, carrito.subtotal "
@@ -138,14 +139,165 @@ def verCarrito():
     user_input = menu.menuCompra()
     
     if user_input== 1:
-        cursor.execute(
-            """
-            INSERT INTO Pedidos (idCliente, fechaPedido, totalPedido)
-            SELECT idCliente, 
-            CURDATE(), -- Fecha actual
-            SUM(subtotal) -- Suma de los subtotales de los productos en el carrito
-            FROM Carrito
-            WHERE idCliente = %s  -- Aquí debes pasar el id del cliente que está realizando el pedido
-            GROUP BY idCliente;"""
-        )
+        crearPedido()
+        
+    elif user_input==2:
+        modificarCarrito()
+    
+    elif user_input==3:
+        menu.menuAcciones()
+  
+      
+def modificarCarrito():
+    
+    user_input= menu.menuModificarCarrito()
+    
+    if user_input ==1:
+        verCarrito()
+        modificarUnidadesProducto()
+    if user_input ==2:
+        verCarrito()
+        eliminarProductoCarrito()
+    else:
+        menu.menuCompra()
+        
+    
+    
+def eliminarProductoCarrito():
+    producto=input("Ingrese el producto que deseas Eliminar: ") 
+    
+    #Extraer el id del producto
+    cursor.execute("SELECT idProducto from productos where nombreProducto=%s", (producto,))
+    idProducto=cursor.fetchone()
+    
+    # Eliminar el producto del carrito del usuario
+    cursor.execute("""
+        DELETE FROM carrito
+        WHERE idProducto = %s AND idCliente = %s
+    """, (idProducto, id_usuario))
+    conexion.commit()
+    
+    print(f" El producto {producto} ha sido eliminado del carrito.")
 
+def modificarUnidadesProducto():
+    producto=input("Ingrese el producto que deseas modificar: ") 
+    unidades= int(input(f"Ingrese el numero de unidades para {producto}: "))
+    
+    #Obtener el id del Prodcuto
+    cursor.execute("SELECT idProducto from productos where nombreProducto=%s", (producto,))
+    idProducto=cursor.fetchone()
+    
+   #Obtener el precio unitario del producto
+    cursor.execute("SELECT precio FROM productos WHERE idProducto = %s", (idProducto,))
+    precio_unitario = cursor.fetchone()
+
+    if precio_unitario:
+        precio_unitario = precio_unitario[0]
+        # Calcular el nuevo subtotal
+        nuevo_subtotal = unidades * precio_unitario
+    
+        # Actualizar el carrito con la nueva cantidad y el nuevo subtotal
+        cursor.execute("""
+            UPDATE carrito
+            SET cantidad = %s, subtotal = %s
+            WHERE idProducto = %s AND idCliente = %s
+        """, (unidades, nuevo_subtotal, idProducto, id_usuario))
+        conexion.commit()
+        
+        print(f"Cantidad del producto {producto} actualizada a {unidades} unidades.")
+    else:
+        print(f"Producto con id {producto} no encontrado.")
+    
+       
+def crearPedido():
+    
+    fecha_pedido, fecha_entrega= generarFecha()
+    total_pedido = totalPedido()
+    print("\n-----Menu de Compra-----")
+    direccion= input("Ingrese una direccion para el envio: ")
+    
+    cursor.execute(
+            """
+            INSERT INTO Pedidos (idCliente, fechaPedido, fechaEntrega, direccionEntrega, totalPedido)
+            VALUES (%s, %s, %s, %s, %s)""", (id_usuario, fecha_pedido, fecha_entrega, direccion, total_pedido)
+        )
+    conexion.commit()
+    print(f"--Pedido realizado correctamente--")
+    
+    #Obtener el idPedido recién insertado
+    cursor.execute("SELECT LAST_INSERT_ID()")
+    id_pedido = cursor.fetchone()[0]
+    
+    #Insertar los detalles en la tabla detalles_pedido
+    cursor.execute(
+            """
+            INSERT INTO Detalles_Pedido (idPedido, idProducto, cantidad, precioUnitario, subtotal)
+            SELECT 
+                %s, 
+                idProducto, 
+                cantidad, 
+                precioUnitario, 
+                subtotal
+            FROM Carrito
+            WHERE idCliente = %s
+            """, (id_pedido, id_usuario))
+    conexion.commit()
+    
+    # Eliminar los productos del carrito
+    cursor.execute("DELETE FROM Carrito WHERE idCliente = %s", (id_usuario,))
+    conexion.commit()
+    
+    # Actualizar el stock de los productos
+    cursor.execute(
+            """
+            UPDATE Productos p
+            JOIN Carrito c ON p.idProducto = c.idProducto
+            SET p.stock = p.stock - c.cantidad
+            WHERE c.idCliente = %s
+            """, (id_usuario,))
+    
+    conexion.commit()
+
+    print("Compra realizada con éxito.")
+    print(f"Su pedido será entregado en {fecha_entrega} a la dirección: {direccion}")
+
+    
+
+def generarFecha():
+
+    random_days= random.randint(7, 15) #Fehca de entrega de una a dos semanas
+    random_hour= random.randint(7, 20) #Horario de entrega de 7 am a 20 pm
+    random_minute= random.randint(0, 59) #Minutos aleatorios para la entrega
+    
+    fecha_pedido0 = datetime.now()  #Extrae la hora local en el momento de realizar el pedido
+    fecha_entrega0= fecha_pedido0 + timedelta(days=random_days) # suma los dias aleatorios al dia del pedido
+    fecha_entrega0= fecha_entrega0.replace(hour=random_hour, minute=random_minute, second=0) # Reemplaza la hora y minutos de entrega por otros aleatorios
+    
+    #Establece el formato aceptado por SQL
+    fecha_pedido= fecha_pedido0.strftime("%Y-%m-%d %H:%M:%S") 
+    fecha_entrega = fecha_entrega0.strftime("%Y-%m-%d %H:%M:%S")
+
+    return fecha_pedido, fecha_entrega
+
+def totalPedido():
+    # Primero, obtenemos todos los productos del carrito para el usuario.
+    cursor.execute("""
+        SELECT c.cantidad, p.precio
+        FROM carrito c
+        JOIN productos p ON c.idProducto = p.idProducto
+        WHERE c.idCliente = %s
+    """, (id_usuario,))
+    
+    productos_carrito = cursor.fetchall()
+    
+    if not productos_carrito: #Evita Error si no hay productos dentro del carrito
+        return 0
+    
+    total_pedido = 0 
+    
+    for cantidad, precio_unitario in productos_carrito:
+        
+        subtotal = cantidad * precio_unitario
+        total_pedido += subtotal
+    
+    return total_pedido
