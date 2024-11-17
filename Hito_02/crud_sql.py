@@ -160,15 +160,17 @@ def eliminarProductoCarrito():
     # Extraer el id del producto
     cursor.execute("SELECT idProducto from productos where nombreProducto=%s", (producto,))
     idProducto = cursor.fetchone()
-    
-    # Eliminar el producto del carrito del usuario
-    cursor.execute("""
-        DELETE FROM carrito
-        WHERE idProducto = %s AND idCliente = %s
-    """, (idProducto, id_usuario))
-    conexion.commit()
-    
-    print(f" El producto {producto} ha sido eliminado del carrito.")
+    if idProducto == None: #Comprueba que el producto existe
+        print(f"Producto: {producto} inexistente")
+    else:
+        # Eliminar el producto del carrito del usuario
+        cursor.execute("""
+            DELETE FROM carrito
+            WHERE idProducto = %s AND idCliente = %s
+        """, (idProducto, id_usuario))
+        conexion.commit()
+        
+        print(f" El producto {producto} ha sido eliminado del carrito.")
 
 # Función para modificar las unidades de un producto en el carrito
 def modificarUnidadesProducto():
@@ -331,6 +333,7 @@ def leerDetallesPedido():
             dp.idPedido = %s
     """, (id_pedido,))
     resultado = cursor.fetchall()
+    
     total = 0
     print(f"\n-----Detalles del pedido {id_pedido}-----")
     for producto, cantidad, precio, subtotal in resultado:
