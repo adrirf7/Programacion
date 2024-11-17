@@ -174,33 +174,52 @@ def eliminarProductoCarrito():
 
 # Función para modificar las unidades de un producto en el carrito
 def modificarUnidadesProducto():
-    producto = input("Ingrese el producto que deseas modificar: ") 
-    unidades = int(input(f"Ingrese el numero de unidades para {producto}: "))
-    
-    # Obtener el id del Producto
-    cursor.execute("SELECT idProducto from productos where nombreProducto=%s", (producto,))
-    idProducto = cursor.fetchone()
-    
-    # Obtener el precio unitario del producto
-    cursor.execute("SELECT precio FROM productos WHERE idProducto = %s", (idProducto,))
-    precio_unitario = cursor.fetchone()
+    producto = input("Ingrese el producto que deseas modificar: ").strip()
+    try:
+        unidades = int(input(f"Ingrese el número de unidades para {producto}: "))
+        if unidades <= 0:
+            print("La cantidad debe ser mayor a 0.")
+            return
+    except ValueError:
+        print("Por favor, ingrese un número válido para las unidades.")
+        return
 
-    if precio_unitario:
-        precio_unitario = precio_unitario[0]
-        # Calcular el nuevo subtotal
-        nuevo_subtotal = unidades * precio_unitario
-    
-        # Actualizar el carrito con la nueva cantidad y el nuevo subtotal
-        cursor.execute("""
-            UPDATE carrito
-            SET cantidad = %s, subtotal = %s
-            WHERE idProducto = %s AND idCliente = %s
-        """, (unidades, nuevo_subtotal, idProducto, id_usuario))
-        conexion.commit()
-        
-        print(f"Cantidad del producto {producto} actualizada a {unidades} unidades.")
-    else:
-        print(f"Producto con id {producto} no encontrado.")
+    # Obtener el id del Producto
+    cursor.execute("SELECT idProducto FROM productos WHERE nombreProducto = %s", (producto,))
+    resultado_producto = cursor.fetchone()
+    if not resultado_producto:
+        print(f"El producto '{producto}' no existe")
+        return
+
+    idProducto = resultado_producto[0]
+
+    # Obtener el precio unitario y el stock del producto
+    cursor.execute("SELECT precio, stock FROM productos WHERE idProducto = %s", (idProducto,))
+    resultado_precio_stock = cursor.fetchone()
+    if not resultado_precio_stock:
+        print("Error al obtener los datos del producto.")
+        return
+
+    precio_unitario, stock = resultado_precio_stock
+
+    # Validar el stock
+    if unidades > stock:
+        print(f"No hay suficiente stock disponible para las unidades ingresadas")
+        return
+
+    # Calcular el nuevo subtotal
+    nuevo_subtotal = unidades * precio_unitario
+
+    # Actualizar el carrito
+    cursor.execute("""
+        UPDATE carrito
+        SET cantidad = %s, subtotal = %s
+        WHERE idProducto = %s AND idCliente = %s
+    """, (unidades, nuevo_subtotal, idProducto, id_usuario))
+    conexion.commit()
+
+    print(f"Cantidad del producto '{producto}' actualizada a {unidades} unidades.")
+
     
 # Función para crear un pedido
 def crearPedido():
