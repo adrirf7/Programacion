@@ -1,4 +1,4 @@
-import crud_sql as sql
+import sys, crud_sql as sql
 
 # Menú principal para el inicio de sesión o registro
 def inicioUsuario():
@@ -14,13 +14,15 @@ def inicioUsuario():
                 print(f"{numero}.- {opcion}")
 
             user_input = int(input("Que deseas Hacer: "))
-            if user_input == 2:
+            if user_input == 1:
+                sql.inicioSesion()
+                break
+            elif user_input == 2:
                 sql.registroUser()  # Llama a la función de registro
                 break
             else:
-                sql.inicioSesion()  # Llama a la función de inicio de sesión
-                break
-        except:
+                print("Ingrese una opcion valida")
+        except ValueError:
             print("Ingrese una opcion valida")
 
 # Menú principal de acciones disponibles para el usuario
@@ -36,25 +38,28 @@ def menuAcciones():
     for numero, opcion in opciones.items():
         print(f"{numero}.- {opcion}")
 
-    user_input = int(input("Que deseas Hacer: "))
-    if user_input == 1:
-        sql.leerCatalogo()  # Muestra los productos disponibles en el catálogo
-    elif user_input == 2:
-        menuCompra()  # Abre el menú para gestionar el carrito de compras
-    elif user_input == 3:
-        sql.leerPedidos()  # Muestra los pedidos realizados por el usuario
-    elif user_input == 4:
-        print("Cerrando el programa...")
-        exit()  # Cierra el programa
-    else:
-        print("--ERROR--Ingrese una opcion valida")
+    try:
+        user_input = int(input("Que deseas Hacer: "))
+        if user_input == 1:
+            sql.leerCatalogo()  # Muestra los productos disponibles en el catálogo
+        elif user_input == 2:
+            menuCompra()  # Abre el menú para gestionar el carrito de compras
+        elif user_input == 3:
+            sql.leerPedidos()  # Muestra los pedidos realizados por el usuario
+        elif user_input == 4:
+            print("Cerrando el programa...")
+            sys.exit()  # Cierra el programa
+        else:
+            print("--ERROR--Ingrese una opcion valida")
+    except ValueError:
+        print("--ERROR-- Ingrese una opción válida")
 
 # Menú para gestionar el carrito de compras
 def menuCompra():
     opciones = {
-        1: "Comprar prodcutos del carrito",
+        1: "Comprar productos del carrito",
         2: "Modificar Carrito",
-        3: "volver al Menu"
+        3: "Volver al Menu"
     }
     while True:
         try:
@@ -66,13 +71,15 @@ def menuCompra():
             user_input = int(input("Ingrese una opcion: "))
             if user_input == 1:
                 sql.crearPedido()  # Finaliza la compra y crea un pedido
+                menuAcciones()
             elif user_input == 2:
                 menuModificarCarrito()  # Permite modificar el contenido del carrito
             elif user_input == 3:
                 menuAcciones()  # Vuelve al menú principal
+                break
             else:
                 print("Ingrese una opcion valida")
-        except:
+        except ValueError:
             print("--ERROR-- Ingrese una opcion valida ")
 
 # Menú para añadir, ver o volver desde el carrito
@@ -99,7 +106,7 @@ def menuCarrito():
                 sql.leerCatalogo()  # Vuelve al catálogo de productos
             else:
                 print("--ERROR--Ingresa una opcion valida")    
-        except:
+        except ValueError:
             print("--ERROR--Ingrese una opcion valida")
 
 # Menú para modificar los productos dentro del carrito
@@ -124,7 +131,7 @@ def menuModificarCarrito():
                 sql.eliminarProductoCarrito()  # Elimina un producto del carrito
             else:
                 menuCompra()  # Vuelve al menú de carrito
-        except:
+        except ValueError:
             print("--ERROR--Ingrese una opcion valida")
 
 # Menú para ver detalles de pedidos realizados
@@ -146,5 +153,5 @@ def menuDetallesPedidos():
                 menuAcciones()  # Vuelve al menú principal
             else:
                 print("--ERROR--Ingrese una opcion valida")
-        except:
+        except ValueError:
             print("--ERROR--Ingrese una opcion valida")
