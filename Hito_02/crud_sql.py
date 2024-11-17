@@ -60,6 +60,7 @@ def inicioSesion():
 
 
 def leerCatalogo():
+    
     cursor.execute("Select * from categorias")
     resultado = cursor.fetchall()
 
@@ -67,59 +68,61 @@ def leerCatalogo():
     for numero, categoria in resultado:
         print(f"{numero}.- {categoria}")
     print(f"{numero +1}.-- Volver al Menu ")
+    
+    while True:
+        try:
+            opciones = [num for num, _ in resultado]
+            user_input=int(input("Que categoria deseas ver?: "))
 
-    opciones = [num for num, _ in resultado]
-    user_input=int(input("Que categoria deseas ver?: "))
-
-    if user_input in opciones:
-        cursor.execute("SELECT nombreProducto, precio, stock FROM productos WHERE idCategoria = %s", (user_input,))
-        resultado = cursor.fetchall()
-        for nombre, precio, stock in resultado:
-            print(f"Producto: {nombre} || Precio: {precio} || Stock: {stock}")
-        añadirCarrito() 
-        
-    else:
-        menu.menuAcciones() 
+            if user_input in opciones:
+                cursor.execute("SELECT nombreProducto, precio, stock FROM productos WHERE idCategoria = %s", (user_input,))
+                resultado = cursor.fetchall()
+                for nombre, precio, stock in resultado:
+                    print(f"Producto: {nombre} || Precio: {precio} || Stock: {stock}")
+                menu.menuCarrito()
+                break 
+                
+            elif user_input==numero+1:
+                menu.menuAcciones() 
+                break
+            else:
+                print("--ERROR--Ingrese una opcion valida")
+        except:
+            print("--ERROR--Ingrese una opcion valida")
 
 def añadirCarrito():
     while True:
-        try:
-            user_input=menu.menuCarrito()
+        try: 
+            producto = (input("Ingrese el nombre del producto que deseas añadir al carrito: ")).strip()
+            unidades= int(input(f"Ingresa la cantidad de unidades para {producto}: "))  
             
-            if user_input== 1:
-                producto = (input("Ingrese el nombre del producto que deseas añadir al carrito: ")).strip()
-                unidades= int(input(f"Ingresa la cantidad de unidades para {producto}: "))
+            cursor.execute("SELECT idProducto, precio from productos where nombreProducto=%s", (producto,))
+            producto_info = cursor.fetchone()
 
-                cursor.execute("SELECT idProducto, precio from productos where nombreProducto=%s", (producto,))
-                producto_info = cursor.fetchone()
-
-                if producto_info is None:
-                    print(f"--ERROR-- Producto '{producto}' no encontrado.")
-                    continue
-                
+            if producto_info is None:
+                print(f"--ERROR-- Producto '{producto}' no encontrado.")
+                        
+            else:
                 idProducto, precio_unitario = producto_info
                 subtotal = unidades * precio_unitario
-                
-                # Obtener el carrito del usuario
-                cursor.execute("insert into carrito (idCliente, idProducto, cantidad, precioUnitario, subtotal) VALUES (%s, %s, %s, %s, %s)",(id_usuario, idProducto, unidades, precio_unitario, subtotal))
+                        
+                cursor.execute("SELECT stock FROM productos where idProducto = %s",(idProducto,))
+                resultado=cursor.fetchone()
+                stock=resultado[0]
+                        
+                if unidades > stock:
+                    print("----Stock insuficiente para las unidades añadidas----")
+                else:
+                    # Obtener el carrito del usuario
+                    cursor.execute("insert into carrito (idCliente, idProducto, cantidad, precioUnitario, subtotal) VALUES (%s, %s, %s, %s, %s)",(id_usuario, idProducto, unidades, precio_unitario, subtotal))
 
-                conexion.commit()
-                print(f"Producto {producto} añadido al carrito con {unidades} unidades.")
-            
-            elif user_input==2:
-                leerCatalogo()
-                
-            elif user_input ==3:
-                verCarrito()
-                break
-                
-            else:
-                print("--ERROR--Ingresa una opcion valida")
-                
-        except Exception as e:
-            print(f"--ERROR-- Ha ocurrido un error: {e}")
+                    conexion.commit()
+                    print(f"Producto {producto} añadido al carrito con {unidades} unidades.")
+                    break
+        except:
+            print("--ERROR-- Ingrese un numero entero")
 
-def verCarrito(): 
+def contenidoCarrito():
     print(f"\n-----Carrito de {user}-----")
     cursor.execute(
         "SELECT productos.nombreProducto, carrito.cantidad, carrito.precioUnitario, carrito.subtotal "
@@ -129,40 +132,13 @@ def verCarrito():
     items = cursor.fetchall()
     
     total = 0
-    for item in items:
-        nombre_producto, cantidad, precio_unitario, subtotal = item
+    for nombre_producto, cantidad, precio_unitario, subtotal in items:
         print(f"|| Producto: {nombre_producto} || Unidades: {cantidad} || Precio: {precio_unitario} || Subtotal: {subtotal}")
         total += subtotal
 
     print(f"\nTotal del Carrito: {total:.2f}")
     
-    user_input = menu.menuCompra()
-    
-    if user_input== 1:
-        crearPedido()
-        
-    elif user_input==2:
-        modificarCarrito()
-    
-    else:
-        menu.menuAcciones()
-  
-      
-def modificarCarrito():
-    
-    user_input= menu.menuModificarCarrito()
-    
-    if user_input ==1:
-        verCarrito()
-        modificarUnidadesProducto()
-    if user_input ==2:
-        verCarrito()
-        eliminarProductoCarrito()
-    else:
-        menu.menuCompra()
-        
-    
-    
+ 
 def eliminarProductoCarrito():
     producto=input("Ingrese el producto que deseas Eliminar: ") 
     
@@ -210,62 +186,63 @@ def modificarUnidadesProducto():
     
        
 def crearPedido():
-    
     fecha_pedido, fecha_entrega= generarFecha()
     total_pedido = totalPedido()
-    print("\n-----Menu de Compra-----")
-    direccion= input("Ingrese una direccion para el envio: ")
     
-    cursor.execute(
-            """
-            INSERT INTO Pedidos (idCliente, fechaPedido, fechaEntrega, direccionEntrega, totalPedido)
-            VALUES (%s, %s, %s, %s, %s)""", (id_usuario, fecha_pedido, fecha_entrega, direccion, total_pedido)
-        )
-    conexion.commit()
-    print(f"--Pedido realizado correctamente--")
-    
-    #Obtener el idPedido recién insertado
-    cursor.execute("SELECT LAST_INSERT_ID()")
-    id_pedido = cursor.fetchone()[0]
-    
-    #Insertar los detalles en la tabla detalles_pedido
-    cursor.execute(
-            """
-            INSERT INTO Detalles_Pedido (idPedido, idProducto, cantidad, precioUnitario, subtotal)
-            SELECT 
-                %s, 
-                idProducto, 
-                cantidad, 
-                precioUnitario, 
-                subtotal
-            FROM Carrito
-            WHERE idCliente = %s
-            """, (id_pedido, id_usuario))
-    conexion.commit()
-    
-    # Eliminar los productos del carrito
-    cursor.execute("DELETE FROM Carrito WHERE idCliente = %s", (id_usuario,))
-    conexion.commit()
-    
-    # Actualizar el stock de los productos
-    cursor.execute(
-            """
-            UPDATE Productos p
-            JOIN Carrito c ON p.idProducto = c.idProducto
-            SET p.stock = p.stock - c.cantidad
-            WHERE c.idCliente = %s
-            """, (id_usuario,))
-    
-    conexion.commit()
+    if total_pedido > 0:
+        
+        print("\n-----Menu de Compra-----")
+        direccion= input("Ingrese una direccion para el envio: ")
+        
+        cursor.execute(
+                """
+                INSERT INTO Pedidos (idCliente, fechaPedido, fechaEntrega, direccionEntrega, totalPedido)
+                VALUES (%s, %s, %s, %s, %s)""", (id_usuario, fecha_pedido, fecha_entrega, direccion, total_pedido)
+            )
+        conexion.commit()
+        
+        #Obtener el idPedido recién insertado
+        cursor.execute("SELECT LAST_INSERT_ID()")
+        id_pedido = cursor.fetchone()[0]
+        
+        #Insertar los detalles en la tabla detalles_pedido
+        cursor.execute(
+                """
+                INSERT INTO Detalles_Pedido (idPedido, idProducto, cantidad, precioUnitario, subtotal)
+                SELECT 
+                    %s, 
+                    idProducto, 
+                    cantidad, 
+                    precioUnitario, 
+                    subtotal
+                FROM Carrito
+                WHERE idCliente = %s
+                """, (id_pedido, id_usuario))
+        conexion.commit()
+        
+        # Actualizar el stock de los productos
+        cursor.execute("Select idProducto, cantidad from carrito where idCliente=%s", (id_usuario))
+        carrito=cursor.fetchall()
+        
+        for idProducto, cantidad in carrito:
+            print(idProducto, cantidad)
+            cursor.execute("UPDATE productos p set stock = p.stock -%s where idProducto =%s", (cantidad, idProducto))
+            conexion.commit()
+        
+         # Eliminar los productos del carrito
+        cursor.execute("DELETE FROM Carrito WHERE idCliente = %s", (id_usuario,))
+        conexion.commit()
 
-    print("Compra realizada con éxito.")
-    print(f"Su pedido será entregado en {fecha_entrega} a la dirección: {direccion}")
-
+        print("---Compra realizada con éxito.---")
+        print(f"Su pedido será entregado en {fecha_entrega} a la dirección: {direccion}")
     
+    else:
+        print("---Para poder comprar primero necesitas añadir productos al carrito---")
+
 
 def generarFecha():
 
-    random_days= random.randint(7, 15) #Fehca de entrega de una a dos semanas
+    random_days= random.randint(7, 15) #Fehca de entrega aleaoria de una a dos semanas
     random_hour= random.randint(7, 20) #Horario de entrega de 7 am a 20 pm
     random_minute= random.randint(0, 59) #Minutos aleatorios para la entrega
     
@@ -323,14 +300,7 @@ def leerPedidos():
     print(f"\n-----Pedidos de {user}-----")
     for id, fechaPedido, fechaEntrega, direccion, total in resultado:
         print(f"Pedido ID: {id} || Pedido Realizado el: {fechaPedido} || Fecha de entrega el: {fechaEntrega} || Direccion de entrega: {direccion} || Total: {total}")
-        
-    user_input= menu.menuDetallesPedidos()
-    
-    if user_input==1:
-        leerDetallesPedido()
-    
-    elif user_input ==2:
-        menu.menuAcciones()
+    menu.menuDetallesPedidos()
         
 def leerDetallesPedido():
     
